@@ -101,7 +101,7 @@ export default function App() {
   }));
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className={`min-h-screen flex flex-col ${dark ? 'bg-gray-950 text-gray-100' : 'bg-white text-gray-900'}`}>
       <Header
         dark={dark}
         onToggleDark={() => setDark((d) => !d)}
@@ -115,9 +115,10 @@ export default function App() {
           onSelect={handleCategorySelect}
           open={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          dark={dark}
         />
         <main className="flex-1 overflow-y-auto px-4 pb-12 pt-4 lg:px-8">
-          <SearchBar value={searchQuery} onChange={setSearchQuery} />
+          <SearchBar value={searchQuery} onChange={setSearchQuery} dark={dark} />
           <p className={`mt-2 mb-6 text-sm ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
             {filtered.length} of {examples.length} examples
             {activeCategory ? ` in ${activeCategory}` : ''}

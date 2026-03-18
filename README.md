@@ -1,6 +1,6 @@
 # Beautiful Code
 
-A gallery of 500 elegant code examples, each explained in plain English for anyone to appreciate the thinking behind the lines of code. No accounts, no API keys, no backend. Just open the page and start reading.
+A gallery of over 500 elegant code examples, each explained in plain English for anyone to appreciate the thinking behind the lines of code. No accounts, no API keys, no backend. Just open the page and start reading.
 
 ## What is elegant code?
 

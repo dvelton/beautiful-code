@@ -1,10 +1,10 @@
 # Beautiful Code
 
-A curated gallery of 500 elegant code examples, each explained in plain English for anyone to appreciate. No accounts, no API keys, no backend. Just open the page and start reading.
+A gallery of 500 elegant code examples, each explained in plain English for anyone to appreciate the thinking behind the lines of code. No accounts, no API keys, no backend. Just open the page and start reading.
 
 ## What is elegant code?
 
-Most people think of code as purely functional, a set of instructions that makes a machine do something. But within that constraint, programmers regularly discover solutions that are unexpectedly concise, surprisingly general, or structured in a way that reveals something true about the problem itself. The best code doesn't just work. It communicates.
+Most people think of code as purely functional, a set of instructions that makes a machine do something. But within that constraint, developers regularly discover solutions that are unexpectedly concise, surprisingly general, or structured in a way that reveals something true about the problem itself. The best code doesn't just work. It communicates.
 
 Elegant code often has the same quality as a well-turned sentence or a clean proof in mathematics. There is nothing extra. Every piece carries weight. When you remove a line, something breaks; when you add a line, nothing improves. That economy is part of what makes certain snippets worth studying, even if you have never written a program.
 

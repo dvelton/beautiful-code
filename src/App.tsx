@@ -56,7 +56,7 @@ export default function App() {
     setActiveCategory(cat);
     setSidebarOpen(false);
     if (cat) {
-      window.location.hash = slugify(cat);
+      history.replaceState(null, '', '#' + slugify(cat));
     } else {
       history.replaceState(null, '', window.location.pathname);
     }

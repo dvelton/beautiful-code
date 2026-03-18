@@ -70,12 +70,16 @@ export default function App() {
   const handleSurprise = useCallback(() => {
     const idx = Math.floor(Math.random() * examples.length);
     const entry = examples[idx];
-    setActiveCategory(null);
+    setActiveCategory(entry.category);
     setSearchQuery('');
-    // Render enough cards so the random pick is actually in the DOM
-    setVisibleCount(Math.max(PAGE_SIZE, idx + 1));
+    // Ensure enough cards are visible within this category to include the pick
+    const posInCategory = examples
+      .filter((ex: CuratedExample) => ex.category === entry.category)
+      .findIndex((ex: CuratedExample) => ex.id === entry.id);
+    setVisibleCount(Math.max(PAGE_SIZE, posInCategory + 1));
     setHighlightId(entry.id);
-    history.replaceState(null, '', window.location.pathname);
+    history.replaceState(null, '', '#' + slugify(entry.category));
+    mainRef.current?.scrollTo(0, 0);
     setTimeout(() => {
       document.getElementById(`card-${entry.id}`)?.scrollIntoView({
         behavior: 'smooth',

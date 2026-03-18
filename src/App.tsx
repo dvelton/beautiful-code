@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { CATEGORIES, type Category, type CuratedExample } from './types';
 import { examples } from './lib/curated';
 import { Header } from './components/Header';
@@ -19,6 +19,14 @@ function slugify(s: string): string {
     .replace(/(^-|-$)/g, '');
 }
 
+const PAGE_SIZE = 30;
+
+const categoryCounts = CATEGORIES.map((cat) => ({
+  category: cat,
+  count: examples.filter((ex: CuratedExample) => ex.category === cat).length,
+  filteredCount: 0,
+}));
+
 export default function App() {
   const [dark, setDark] = useState(true);
   const [activeCategory, setActiveCategory] = useState<Category | null>(
@@ -27,7 +35,8 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const galleryRef = useRef<HTMLDivElement>(null);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const mainRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -46,20 +55,16 @@ export default function App() {
     }
   }, [dark]);
 
-  useEffect(() => {
-    const onHash = () => setActiveCategory(getCategoryFromHash());
-    window.addEventListener('hashchange', onHash);
-    return () => window.removeEventListener('hashchange', onHash);
-  }, []);
-
   const handleCategorySelect = useCallback((cat: Category | null) => {
     setActiveCategory(cat);
+    setVisibleCount(PAGE_SIZE);
     setSidebarOpen(false);
     if (cat) {
       history.replaceState(null, '', '#' + slugify(cat));
     } else {
       history.replaceState(null, '', window.location.pathname);
     }
+    mainRef.current?.scrollTo(0, 0);
   }, []);
 
   const handleSurprise = useCallback(() => {
@@ -67,6 +72,7 @@ export default function App() {
     const entry = examples[idx];
     setActiveCategory(null);
     setSearchQuery('');
+    setVisibleCount(PAGE_SIZE);
     setHighlightId(entry.id);
     history.replaceState(null, '', window.location.pathname);
     setTimeout(() => {
@@ -78,27 +84,32 @@ export default function App() {
     setTimeout(() => setHighlightId(null), 2000);
   }, []);
 
-  const filtered = examples.filter((ex: CuratedExample) => {
-    if (activeCategory && ex.category !== activeCategory) return false;
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      return (
-        ex.title.toLowerCase().includes(q) ||
-        ex.language.toLowerCase().includes(q) ||
-        ex.conceptTags.some((t) => t.toLowerCase().includes(q)) ||
-        ex.explanation.toLowerCase().includes(q) ||
-        ex.whyElegant.toLowerCase().includes(q) ||
-        ex.keyInsight.toLowerCase().includes(q)
-      );
-    }
-    return true;
-  });
+  const handleSearch = useCallback((q: string) => {
+    setSearchQuery(q);
+    setVisibleCount(PAGE_SIZE);
+  }, []);
 
-  const categoryCounts = CATEGORIES.map((cat) => ({
-    category: cat,
-    count: examples.filter((ex: CuratedExample) => ex.category === cat).length,
-    filteredCount: filtered.filter((ex) => ex.category === cat).length,
-  }));
+  const filtered = useMemo(() =>
+    examples.filter((ex: CuratedExample) => {
+      if (activeCategory && ex.category !== activeCategory) return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        return (
+          ex.title.toLowerCase().includes(q) ||
+          ex.language.toLowerCase().includes(q) ||
+          ex.conceptTags.some((t) => t.toLowerCase().includes(q)) ||
+          ex.explanation.toLowerCase().includes(q) ||
+          ex.whyElegant.toLowerCase().includes(q) ||
+          ex.keyInsight.toLowerCase().includes(q)
+        );
+      }
+      return true;
+    }),
+    [activeCategory, searchQuery],
+  );
+
+  const visible = filtered.slice(0, visibleCount);
+  const hasMore = visibleCount < filtered.length;
 
   return (
     <div className={`min-h-screen flex flex-col ${dark ? 'bg-gray-950 text-gray-100' : 'bg-white text-gray-900'}`}>
@@ -117,16 +128,28 @@ export default function App() {
           onClose={() => setSidebarOpen(false)}
           dark={dark}
         />
-        <main className="flex-1 overflow-y-auto px-4 pb-12 pt-4 lg:px-8">
-          <SearchBar value={searchQuery} onChange={setSearchQuery} dark={dark} />
+        <main ref={mainRef} className="flex-1 overflow-y-auto px-4 pb-12 pt-4 lg:px-8">
+          <SearchBar value={searchQuery} onChange={handleSearch} dark={dark} />
           <p className={`mt-2 mb-6 text-sm ${dark ? 'text-gray-400' : 'text-gray-500'}`}>
             {filtered.length} of {examples.length} examples
             {activeCategory ? ` in ${activeCategory}` : ''}
             {searchQuery.trim() ? ` matching "${searchQuery}"` : ''}
           </p>
-          <div ref={galleryRef}>
-            <Gallery examples={filtered} highlightId={highlightId} dark={dark} />
-          </div>
+          <Gallery examples={visible} highlightId={highlightId} dark={dark} />
+          {hasMore && (
+            <div className="flex justify-center mt-8">
+              <button
+                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  dark
+                    ? 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                }`}
+              >
+                Show more ({filtered.length - visibleCount} remaining)
+              </button>
+            </div>
+          )}
         </main>
       </div>
     </div>

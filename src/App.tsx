@@ -72,7 +72,8 @@ export default function App() {
     const entry = examples[idx];
     setActiveCategory(null);
     setSearchQuery('');
-    setVisibleCount(PAGE_SIZE);
+    // Render enough cards so the random pick is actually in the DOM
+    setVisibleCount(Math.max(PAGE_SIZE, idx + 1));
     setHighlightId(entry.id);
     history.replaceState(null, '', window.location.pathname);
     setTimeout(() => {
